@@ -1,4 +1,7 @@
 <?php
+$silent = (!isset($argv[1]) || $argv[1] !== '-l' ? true : false);
+$save = (isset($argv[2]) && $argv[2] === '-s' ? true : false);
+
 $oldIPban = @file_get_contents(__DIR__ . '/.logIPban.json');
 if($oldIPban) {
 	$oldIPban = json_decode($oldIPban, true);
@@ -36,6 +39,9 @@ $processBan = [];
 
 foreach($ips as $ip => $stats) {
 	if(isset($banIPs[$ip])) {
+		if($save) {
+			$processBan[] = $ip;
+		}
 		continue;
 	}
 	if(isset($warnIPs[$ip])) {
@@ -51,7 +57,7 @@ foreach($ips as $ip => $stats) {
 		}
 	}
 	if( $stats['cnt'] >= 3 ) {
-		if(isset($ips[$ip]['countryCode']) && $ips[$ip]['countryCode'] === 'CZ' && $stats['cnt'] < 30) {
+		if(isset($stats['countryCode']) && $stats['countryCode'] === 'CZ' && $stats['cnt'] < 30) {
 			$warnIPs[$ip] = $stats;
 			continue;
 		} 		
@@ -65,27 +71,30 @@ foreach($ips as $ip => $stats) {
 
 if(count($processBan)) {
 	foreach($processBan as $banIP) {
-		exec('iptables -A INPUT -s ' . $banIP . ' -j DROP');
+		echo 'BAN NEW IP ' . $banIP . PHP_EOL;
+		exec('/usr/sbin/iptables -A mailBanIP -s ' . $banIP . ' -j REJECT');
 	}
 	echo PHP_EOL;
-	echo exec('service iptables save');
+	echo exec('/usr/sbin/service iptables save');
 	echo PHP_EOL;
 }
-
-echo PHP_EOL;
-echo 'TOTAL LINES: ' . $linecount . PHP_EOL;
-echo 'TOTAL WARN IPs: ' . count($warnIPs) . PHP_EOL;
-echo 'TOTAL BAN IPs: ' . count($banIPs) . PHP_EOL;
-echo PHP_EOL;
-foreach($banIPs as $ip => $stats) {
-	echo 'BAN: ' . $ip . ' [' . (isset($stats['countryCode']) ? $stats['countryCode'] : '--') . ']: ' . $stats['cnt'] . 'x' . PHP_EOL;
-}
-echo PHP_EOL;
-foreach($warnIPs as $ip => $stats) {
-	echo 'WARN: ' . $ip . ' [' . (isset($stats['countryCode']) ? $stats['countryCode'] : '--') . ']: ' . $stats['cnt'] . 'x' . PHP_EOL;
-}
-echo PHP_EOL;
-echo PHP_EOL;
 
 file_put_contents(__DIR__ . '/.logIPban.json', json_encode($banIPs));
 file_put_contents(__DIR__ . '/.logIPwarn.json', json_encode($warnIPs));
+
+if(!$silent) {
+	echo PHP_EOL;
+	echo 'TOTAL LINES: ' . $linecount . PHP_EOL;
+	echo 'TOTAL WARN IPs: ' . count($warnIPs) . PHP_EOL;
+	echo 'TOTAL BAN IPs: ' . count($banIPs) . PHP_EOL;
+	echo PHP_EOL;
+	foreach($banIPs as $ip => $stats) {
+		echo 'BAN: ' . $ip . ' [' . (isset($stats['countryCode']) ? $stats['countryCode'] : '--') . ']: ' . $stats['cnt'] . 'x' . PHP_EOL;
+	}
+	echo PHP_EOL;
+	foreach($warnIPs as $ip => $stats) {
+		echo 'WARN: ' . $ip . ' [' . (isset($stats['countryCode']) ? $stats['countryCode'] : '--') . ']: ' . $stats['cnt'] . 'x' . PHP_EOL;
+	}
+	echo PHP_EOL;
+	echo PHP_EOL;
+}
