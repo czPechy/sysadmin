@@ -1,4 +1,12 @@
 <?php
+
+/*
+* CREATE CHAIN
+* $ iptables -N mailBanIP
+* $ iptables -t filter -A INPUT -j mailBanIP
+* $ service iptables save
+*/
+
 $silent = (!isset($argv[1]) || $argv[1] !== '-l' ? true : false);
 $save = (isset($argv[2]) && $argv[2] === '-s' ? true : false);
 
