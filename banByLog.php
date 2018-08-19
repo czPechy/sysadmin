@@ -50,11 +50,12 @@ foreach($ips as $ip => $stats) {
 		if($save) {
 			$processBan[] = $ip;
 		}
+		if(isset($warnIPs[$ip])) {
+			unset($warnIPs[$ip]);
+		}
 		continue;
 	}
-	if(isset($warnIPs[$ip])) {
-		continue;
-	}
+	
 	$ipInfo = isset($warnIPs[$ip]) ? null : @file_get_contents('http://ip-api.com/json/' . $ip);
 	if($ipInfo) {
 		$ipInfo = @json_decode($ipInfo);
@@ -106,3 +107,4 @@ if(!$silent) {
 	echo PHP_EOL;
 	echo PHP_EOL;
 }
+
