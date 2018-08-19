@@ -82,6 +82,7 @@ if(count($processBan)) {
 	foreach($processBan as $banIP) {
 		echo 'BAN NEW IP ' . $banIP . PHP_EOL;
 		exec('/usr/sbin/iptables -A mailBanIP -s ' . $banIP . ' -j REJECT');
+		exec('echo "' . date('Y-m-d H:i:s') . ' New IP address [' . $banIP . '] is banned" >> ' . $file);
 	}
 	echo PHP_EOL;
 	echo exec('/usr/sbin/service iptables save');
