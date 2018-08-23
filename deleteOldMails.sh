@@ -14,3 +14,4 @@ find /home/*/mail/*/*/.Spam/cur -type f -mtime +30 -delete
 
 # Deleted Messages - Junk
 find /home/*/mail/*/*/.Junk/cur -type f -mtime +30 -delete
+
