@@ -4,7 +4,7 @@ $silent = ( !isset( $argv[1] ) || $argv[1] !== '-l' );
 $homeDirectory = '/home/';
 $mailDirectory = '/mail/';
 $airmailDirectory = '.[Airmail]';
-$spamFolders = ['.Spam', '.Junk', '.Unwanted', '.Trash.Spam'];
+$spamFolders = ['.Spam', '.Junk', '.Unwanted', '.Trash.Spam', '.Junk E-mail'];
 $trashFolders = ['.Trash', '.Deleted Messages', '.Ko&AWE-', '.Deleted Items'];
 $ignoreFolders = [
     '.Sent', '.Sent Messages', '.Sent Items', '.Drafts', '.Odeslan&AOk-', '.Odeslane&AwE-',
