@@ -8,7 +8,7 @@
 $silent = (!isset($argv[1]) || $argv[1] !== '-l' ? true : false);
 $save = (isset($argv[2]) && $argv[2] === '-s' ? true : false);
 
-$ignoreIps = ['84.242.85.123'];
+$ignoreIps = ['84.242.85.123', '217.182.5.113'];
 
 $oldIPban = @file_get_contents(__DIR__ . '/.logIPban.json');
 if($oldIPban) {
@@ -41,8 +41,6 @@ while(!feof($handle)){
 	$linecount = $linecount + substr_count($line, PHP_EOL);
 }
 fclose($handle);
-var_dump($ips);
-die;
 
 $warnIPs = $oldIPwarn;
 $banIPs = $oldIPban;
