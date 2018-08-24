@@ -1,6 +1,14 @@
 <?php
+/*
+* CREATE CHAIN
+* $ iptables -N mailBanIP
+* $ iptables -t filter -A INPUT -j mailBanIP
+*/
+
 $silent = (!isset($argv[1]) || $argv[1] !== '-l' ? true : false);
 $save = (isset($argv[2]) && $argv[2] === '-s' ? true : false);
+
+$ignoreIps = ['84.242.85.123'];
 
 $oldIPban = @file_get_contents(__DIR__ . '/.logIPban.json');
 if($oldIPban) {
@@ -15,23 +23,26 @@ if($oldIPwarn) {
 	$oldIPwarn = [];	
 }
 
-$file="/var/log/exim4/mainlog";
+$file="/var/log/dovecot.log";
 $linecount = 0;
 $ips = [];
 $handle = fopen($file, "r");
 while(!feof($handle)){
 	$line = fgets($handle, 4096);
-	if(preg_match('~^([\d\-]+\s[\d\:]+)\sdovecot.+\[([0-9\.]+)\]\:\s535\sIncorrect\sauthentication~', $line, $matches)){
-		$date = $matches[1];
-		$ip = $matches[2];
-		if(!isset($ips[$ip])) {
-			$ips[$ip] = [ 'cnt' => 0 ];
-		}
-		$ips[$ip]['cnt']++;
+	if(preg_match('~passwd-file\([a-zA-Z\.@]+\,([0-9\.]+)\,\<.+\>\)\:\sunknown\suser~', $line, $matches)){
+		$ip = $matches[1];
+		if(!\in_array($ip, $ignoreIps, true)) {
+            if(!isset($ips[$ip])) {
+                $ips[$ip] = [ 'cnt' => 0 ];
+            }
+            $ips[$ip]['cnt']++;
+        }
 	}
 	$linecount = $linecount + substr_count($line, PHP_EOL);
 }
 fclose($handle);
+var_dump($ips);
+die;
 
 $warnIPs = $oldIPwarn;
 $banIPs = $oldIPban;
@@ -73,11 +84,12 @@ foreach($ips as $ip => $stats) {
 if(count($processBan)) {
 	foreach($processBan as $banIP) {
 		echo 'BAN NEW IP ' . $banIP . PHP_EOL;
-		exec('/usr/sbin/iptables -A mailBanIP -s ' . $banIP . ' -j REJECT');
+		exec('/sbin/iptables -A mailBanIP -s ' . $banIP . ' -j REJECT');
 		exec('echo "' . date('Y-m-d H:i:s') . ' New IP address [' . $banIP . '] is banned" >> ' . $file);
 	}
 	echo PHP_EOL;
-	echo exec('/usr/sbin/service iptables save');
+	echo exec('/sbin/iptables -S > /etc/iptables.rules');
+	echo exec('/sbin/iptables -S > /etc/iptables/rules.v4');
 	echo PHP_EOL;
 }
 
