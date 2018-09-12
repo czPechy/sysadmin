@@ -20,12 +20,14 @@ echo ' - uptime: ' . bootTime(time() - $memory['boot']) . PHP_EOL;
 echo PHP_EOL;
 
 echo 'CPU:' . PHP_EOL;
-echo ' - used:  ' . number_format($cpu, 1) . '%' . PHP_EOL;
-echo ' - stats: ' . PHP_EOL;
+echo ' - model:  ' . $cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Name'] . PHP_EOL;
+echo ' - cores:  ' . $cpu['cores'] . ' (' . ($cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Jader na patici']) . 'c/' . $cpu['cores']/$cpu['desc']['Patic'] . 't)' . PHP_EOL;
+echo ' - temp:   ~' . number_format(avgTemp($sensors),0) . '°C' . PHP_EOL;
+echo ' - used:   ' . number_format($cpu['usage'], 1) . '%' . PHP_EOL;
+echo ' - avg:    ' . PHP_EOL;
 echo '   - system: ' . number_format($iostat['cpu']['system'], 2) . '%' . PHP_EOL;
 echo '   - user:   ' . number_format($iostat['cpu']['user'], 2) . '%' . PHP_EOL;
 echo '   - idle:   ' . number_format($iostat['cpu']['idle'], 2) . '%' . PHP_EOL;
-echo ' - temp:  ~' . number_format(avgTemp($sensors),0) . '°C' . PHP_EOL;
 echo PHP_EOL;
 
 echo 'MEMORY:' . PHP_EOL;
@@ -192,7 +194,7 @@ function disk() {
 
 function sensors() {
     $result = shell_exec('sensors');
-    preg_match_all('~Core\s(?<core>\d+):\s+\+(?<temp>[\d\.]+)\°C\s+\(high\s\=\s\+(?<high>[\d\.]+)\°C\,\scrit\s\=\s\+(?<crit>[\d\.]+)\°C\)~', $result, $matches);
+    preg_match_all('~Core\s(?<core>\d+):\s+\+(?<temp>[\d\.]+)\°C\s+\(high\s\=\s\+(?<high>[\d\.]+)\°C\,\scrit\s\=\s\+(?<crit>[\d\.]+)\°C\)~u', $result, $matches);
     $cpus = [];
 
     foreach($matches['core'] as $key => $core) {
@@ -228,8 +230,23 @@ function sensors() {
 }
 
 function cpu() {
-	$cpu = shell_exec('top -b -n 1 | grep "Cpu(s)\:" | awk \'{print $2}\'');
-	return toFloat($cpu);
+	$cpuUsage = shell_exec('top -b -n 1 | grep "Cpu(s)\:" | awk \'{print $2}\'');
+	$cpuCores = shell_exec('nproc');
+
+    $result = shell_exec('lscpu');
+    $result = str_replace('Název modelu', 'Name', $result);
+    preg_match_all('~^([a-zA-Z0-9\s]+):\s+(.*)$~mu', $result, $matches);
+
+    $data = [];
+    foreach($matches[0] as $key => $item) {
+        $data[$matches[1][$key]] = $matches[2][$key];
+    }
+
+	return [
+	    'usage' => toFloat($cpuUsage),
+        'cores' => (int) $cpuCores,
+        'desc' => $data
+    ];
 }
 
 function toFloat($input) {
