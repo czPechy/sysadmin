@@ -6,62 +6,76 @@ $sensors = sensors();
 $iostat = iostat();
 $cpu = cpu();
 
-echo 'TESTING MODE:' . PHP_EOL;
-echo PHP_EOL;
+$isTesting = \in_array('-t', $argv, true);
 
-echo 'SYSTEM:' . PHP_EOL;
-echo ' - host:   ' . $basic['Static hostname'] . PHP_EOL;
-echo ' - os:     ' . $basic['Operating System'] . PHP_EOL;
-echo ' - kernel: ' . $basic['Kernel'] . PHP_EOL;
-echo ' - id:     ' . $basic['Machine ID'] . PHP_EOL;
-echo ' - boot:   ' . (new DateTime())->setTimestamp($memory['boot'])->format('Y-m-d H:i:s') . PHP_EOL;
-echo ' - uptime: ' . bootTime(time() - $memory['boot']) . PHP_EOL;
+if($isTesting) {
+    echo 'TESTING MODE:' . PHP_EOL;
+    echo PHP_EOL;
 
-echo PHP_EOL;
+    echo 'SYSTEM:' . PHP_EOL;
+    echo ' - host:   ' . $basic['Static hostname'] . PHP_EOL;
+    echo ' - os:     ' . $basic['Operating System'] . PHP_EOL;
+    echo ' - kernel: ' . $basic['Kernel'] . PHP_EOL;
+    echo ' - id:     ' . $basic['Machine ID'] . PHP_EOL;
+    echo ' - boot:   ' . (new DateTime())->setTimestamp($memory['boot'])->format('Y-m-d H:i:s') . PHP_EOL;
+    echo ' - uptime: ' . bootTime(time() - $memory['boot']) . PHP_EOL;
 
-echo 'CPU:' . PHP_EOL;
-echo ' - model:  ' . $cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Name'] . PHP_EOL;
-echo ' - cores:  ' . $cpu['cores'] . ' (' . ($cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Jader na patici']) . 'c/' . $cpu['cores']/$cpu['desc']['Patic'] . 't)' . PHP_EOL;
-echo ' - temp:   ~' . number_format(avgTemp($sensors),0) . '°C' . PHP_EOL;
-echo ' - used:   ' . number_format($cpu['usage'], 1) . '%' . PHP_EOL;
-echo ' - avg:    ' . PHP_EOL;
-echo '   - system: ' . number_format($iostat['cpu']['system'], 2) . '%' . PHP_EOL;
-echo '   - user:   ' . number_format($iostat['cpu']['user'], 2) . '%' . PHP_EOL;
-echo '   - idle:   ' . number_format($iostat['cpu']['idle'], 2) . '%' . PHP_EOL;
-echo PHP_EOL;
+    echo PHP_EOL;
 
-echo 'MEMORY:' . PHP_EOL;
-echo ' - total: ' . formatBytes($memory['memory']['total']) . PHP_EOL;
-echo ' - used:  ' . number_format(($memory['memory']['used']/$memory['memory']['total']) * 100, 1) . '% (' . formatBytes($memory['memory']['used']) . ')' . PHP_EOL;
-echo PHP_EOL;
+    echo 'CPU:' . PHP_EOL;
+    echo ' - model:  ' . $cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Model name'] . PHP_EOL;
+    echo ' - cores:  ' . $cpu['cores'] . ' (' . ($cpu['desc']['Patic'] . 'x ' . $cpu['desc']['Jader na patici']) . 'c/' . $cpu['cores']/$cpu['desc']['Patic'] . 't)' . PHP_EOL;
+    echo ' - temp:   ~' . number_format(avgTemp($sensors),0) . '°C' . PHP_EOL;
+    echo ' - used:   ' . number_format($cpu['usage'], 1) . '%' . PHP_EOL;
+    echo ' - avg:    ' . PHP_EOL;
+    echo '   - system: ' . number_format($iostat['cpu']['system'], 2) . '%' . PHP_EOL;
+    echo '   - user:   ' . number_format($iostat['cpu']['user'], 2) . '%' . PHP_EOL;
+    echo '   - idle:   ' . number_format($iostat['cpu']['idle'], 2) . '%' . PHP_EOL;
+    echo PHP_EOL;
 
-echo 'SWAP:' . PHP_EOL;
-echo ' - total: ' . formatBytes($memory['swap']['total']) . PHP_EOL;
-echo ' - used:  ' . number_format(($memory['swap']['used']/$memory['swap']['total']) * 100, 1) . '% (' . formatBytes($memory['swap']['used']) . ')' . PHP_EOL;
-echo PHP_EOL;
+    echo 'MEMORY:' . PHP_EOL;
+    echo ' - total: ' . formatBytes($memory['memory']['total']) . PHP_EOL;
+    echo ' - used:  ' . number_format(($memory['memory']['used']/$memory['memory']['total']) * 100, 1) . '% (' . formatBytes($memory['memory']['used']) . ')' . PHP_EOL;
+    echo PHP_EOL;
 
-echo 'DISK:' . PHP_EOL;
-foreach($iostat['disk'] as $disk) {
-    echo ' - ' . $disk['disk'] . PHP_EOL;
-    echo '   - stats:' . PHP_EOL;
-    echo '     - tps: ' . $disk['tps'] . PHP_EOL;
-    echo '     - r/w: ' . $disk['read_s'] . '/' . $disk['write_s'] . PHP_EOL;
-}
-foreach($disks as $disk) {
-    echo ' - ' . $disk['disk'] . ':' . PHP_EOL;
-    echo '   - total: ' . formatBytes($disk['total']) . PHP_EOL;
-    echo '   - used:  ' . number_format($disk['used_percentage'], 0) . '% (' . formatBytes($disk['used']) . ')' . PHP_EOL;
-}
-echo PHP_EOL;
+    echo 'SWAP:' . PHP_EOL;
+    echo ' - total: ' . formatBytes($memory['swap']['total']) . PHP_EOL;
+    echo ' - used:  ' . number_format(($memory['swap']['used']/$memory['swap']['total']) * 100, 1) . '% (' . formatBytes($memory['swap']['used']) . ')' . PHP_EOL;
+    echo PHP_EOL;
 
-echo 'TEMP:' . PHP_EOL;
-foreach ( $sensors as $key => $cpu ) {
-    echo ' - CPU' . $key . ':' . PHP_EOL;
-    foreach($cpu as $core) {
-        echo '   - core' . $core['core'] . ': ' . $core['temp'] . '°C' . PHP_EOL;
+    echo 'DISK:' . PHP_EOL;
+    foreach($iostat['disk'] as $disk) {
+        echo ' - ' . $disk['disk'] . PHP_EOL;
+        echo '   - stats:' . PHP_EOL;
+        echo '     - tps: ' . $disk['tps'] . PHP_EOL;
+        echo '     - r/w: ' . $disk['read_s'] . '/' . $disk['write_s'] . PHP_EOL;
     }
+    foreach($disks as $disk) {
+        echo ' - ' . $disk['disk'] . ':' . PHP_EOL;
+        echo '   - total: ' . formatBytes($disk['total']) . PHP_EOL;
+        echo '   - used:  ' . number_format($disk['used_percentage'], 0) . '% (' . formatBytes($disk['used']) . ')' . PHP_EOL;
+    }
+    echo PHP_EOL;
+
+    echo 'TEMP:' . PHP_EOL;
+    foreach ( $sensors as $key => $cpu ) {
+        echo ' - CPU' . $key . ':' . PHP_EOL;
+        foreach($cpu as $core) {
+            echo '   - core' . $core['core'] . ': ' . $core['temp'] . '°C' . PHP_EOL;
+        }
+    }
+    echo PHP_EOL;
+} else {
+    $data = [
+        'basic' => $basic,
+        'memory' => $memory,
+        'disks' => $disks,
+        'sensors' => $sensors,
+        'iostat' => $iostat,
+        'cpu' => $cpu,
+    ];
+    echo json_encode($data);
 }
-echo PHP_EOL;
 
 function bootTime($input) {
     $unit = 's';
@@ -234,13 +248,14 @@ function cpu() {
 	$cpuCores = shell_exec('nproc');
 
     $result = shell_exec('lscpu');
-    $result = str_replace('Název modelu', 'Name', $result);
+    $result = str_replace('Název modelu', 'Model name', $result);
     preg_match_all('~^([a-zA-Z0-9\s]+):\s+(.*)$~mu', $result, $matches);
 
     $data = [];
     foreach($matches[0] as $key => $item) {
-        $data[$matches[1][$key]] = $matches[2][$key];
+        $data[$matches[1][$key]] = preg_replace('~(\s+\s+)~', ' ', $matches[2][$key]);
     }
+    unset($data['Flags']);
 
 	return [
 	    'usage' => toFloat($cpuUsage),
