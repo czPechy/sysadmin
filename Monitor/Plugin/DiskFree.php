@@ -7,7 +7,7 @@ class DiskFree implements IPlugin
 {
 
     const COMMAND = 'df';
-    const PARSER = '~(?<disk>\/[a-zA-Z0-9\/]+)\s+(?<total>\d+)\s+(?<used>\d+)\s+(?<free>\d+)\s+(?<used_percentage>\d+)%\s(?<mount>.+)~';
+    const PARSER = '~(?<disk>\/[a-zA-Z0-9\/\-]+)\s+(?<total>\d+)\s+(?<used>\d+)\s+(?<free>\d+)\s+(?<used_percentage>\d+)%\s(?<mount>.+)~';
 
     public function execute()
     {

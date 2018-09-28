@@ -8,8 +8,8 @@ class IOstat implements IPlugin
 {
 
     const COMMAND = 'iostat';
-    const PARSER_CPU = '~\s+(?<user>[\d\,]+)\s+(?<nice>[\d\,]+)\s+(?<system>[\d\,]+)\s+(?<iowait>[\d\,]+)\s+(?<steal>[\d\,]+)\s+(?<idle>[\d\,]+)~';
-    const PARSER_DISK = '~^(?<disk>[\da-zA-Z\,]+)\s+(?<tps>[\d\,]+)\s+(?<read_s>[\d\,]+)\s+(?<write_s>[\d\,]+)\s+(?<read>[\d\,]+)\s+(?<write>[\d\,]+)$~m';
+    const PARSER_CPU = '~\s+(?<user>[\d\,\.]+)\s+(?<nice>[\d\,\.]+)\s+(?<system>[\d\,\.]+)\s+(?<iowait>[\d\,\.]+)\s+(?<steal>[\d\,\.]+)\s+(?<idle>[\d\,\.]+)~';
+    const PARSER_DISK = '~^(?<disk>[\da-zA-Z\,\.]+)\s+(?<tps>[\d\,\.]+)\s+(?<read_s>[\d\,\.]+)\s+(?<write_s>[\d\,\.]+)\s+(?<read>[\d\,\.]+)\s+(?<write>[\d\,\.]+)$~m';
 
     public function execute()
     {
